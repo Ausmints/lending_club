@@ -277,7 +277,6 @@ def draw_proportion_barplot(data: pd.Series, metadata: list):
 
 ###
 
-
 def draw_comparison_barplot(
     df: pd.DataFrame,
     binary_column: str,
@@ -287,6 +286,7 @@ def draw_comparison_barplot(
     rotate_x=False,
     largefig=True,
     mode="count",
+    y_labels=True,
 ):
     """
     Draws a double barplot for comparing a multiple category column's value counts split by a different binary column. If mode_count is False, then just takes the values of "count" column in the provided dataframe. It's possible to color some columns in orange/blue or grey.
@@ -385,6 +385,9 @@ def draw_comparison_barplot(
         blue_patch = mpatches.Patch(color=colors["blue"], label=binary_values[1])
         orange_patch = mpatches.Patch(color=colors["orange"], label=binary_values[0])
     plt.legend(handles=[orange_patch, blue_patch])
+    
+    if not y_labels:
+        ax.set_yticks([])
 
     plt.show()
 
