@@ -412,34 +412,487 @@ def draw_confusion_heatmap(matrix: np.ndarray, metadata: list):
     ax.set_title(metadata[0])
 
     plt.show()
-
-
-###
-
-###
-
-
-def grid_search_results_to_df(results: dict, model_name: str):
+    
+    
+def draw_usa(df, column, title, legend=True) -> None:
     """
-    Transforms parameter results from GridSearchCV from dict to df, combines with mean test and train score and also gets rid of "<model_name>__" prefix added for parameter use in pipeline
-
+    Draws the map of USA, with the states colored in different intensity given by the "column" attribute in the "df".
+    
     Parameters:
-      results(dict): cv_results dict given by GridSearchCV
-      mosel_name(str): name of the model used in the pipeline fed into the GridSearchCV
+        df(pd.DataFrame): A dataframe containing data for plotting
+        column(str): Name of the column containing data for state color intensity
+        title(str): Contains the title for the graph
+        legend(bool): Toggle for the legend explaining the colors. Default is "True"
+
+      Returns:
+        Nothing
+    
     """
-    grid_df = (
-        pd.DataFrame(results)
-        .loc[:, ["mean_test_score", "mean_train_score", "params"]]
-        .sort_values("mean_test_score", ascending=False)
-        .iloc[:10]
+    ax = df.plot(figsize=(30, 10), column=column, legend=legend)
+    ax.plot([-14200000, -14200000], [7000000, 5000000], linewidth=2, color=colors["black"])
+    ax.plot([-14200000, -16500000], [5000000, 5000000], linewidth=2, color=colors["black"])
+    ax.plot([-14200000, -13500000], [5000000, 3000000], linewidth=2, color=colors["black"])
+    ax.grid(False)
+    ax.set_yticklabels([])
+    ax.set_xticklabels([])
+    ax.set_title(title)
+    plt.show()
+
+
+###
+
+###
+
+
+def df2_to_df(df2 : pd.DataFrame) -> pd.DataFrame:
+    """
+    Function that transforms data from accepted application dataset into similar format to the data in the rejected application dataset.
+    """
+    df2 = df2.loc[:, ["loan_amnt", "title", "fico_range_low", "fico_range_high", "dti", "zip_code", "addr_state", "emp_length", "loan_status"]]
+    df2["risk_score"] = (df2["fico_range_low"] + df2["fico_range_high"])/2
+    df2["accepted"] = 1
+    df2.loc[df2["loan_status"] == "Charged Off","accepted"] = 2
+    df2 = df2.drop(["fico_range_low", "fico_range_high", "loan_status"], axis=1)
+    
+    df2_name_dict = {
+        "loan_amnt":"amount_requested",
+        "title":"loan_title",
+        "dti":"debt_to_income_ratio",
+        "addr_state":"state",
+        "emp_length":"employment_length"
+    }
+    df2 = df2.rename(columns=df2_name_dict)
+    return df2
+
+
+def clean_data(df : pd.DataFrame) -> pd.DataFrame:
+    """
+    Function that cleans up data for the first task for EDA.
+    """
+    df["employment_length"] = df["employment_length"].replace({"10+ years":"15", "< 1 year":"0"})
+    df["employment_length"] = df["employment_length"].str.extract(r"([0-9]+)").astype("float")
+    df = df.rename(columns={"employment_length" : "employment_length_years"})
+    df["debt_to_income_ratio"] = df["debt_to_income_ratio"].replace("%", "", regex=True).astype(float)
+    df["amount_requested"] = df["amount_requested"].astype(int)
+    
+    df.loc[:, "loan_title"] = df["loan_title"].str.lower().replace("[^a-zA-Z0-9]", " ", regex=True)
+
+    fcols = df.select_dtypes('float').columns
+    icols = df.select_dtypes('integer').columns
+    df[fcols] = df[fcols].apply(pd.to_numeric, downcast='float')
+    df[icols] = df[icols].apply(pd.to_numeric, downcast='integer')
+
+    return df
+
+
+def zip_state_to_coordinates(df : pd.DataFrame) -> pd.DataFrame:
+    """
+    Function that converts state and zip_code columns into latitude and longitude.
+    """
+    df = df.drop(df[df["zip_code"].isnull()].index.tolist(), axis=0)
+    df["bin"] = df["zip_code"].str.strip("x") + df["state"]
+    df = df.merge(bin_coord_means.reset_index(), on="bin", how="left")
+    df = df.merge(state_coord_means.reset_index(), on="state", how="left")
+    df["latitude"] = df["latitude"].fillna(df["state_latitude"])
+    df["longitude"] = df["longitude"].fillna(df["state_longitude"])
+    df.drop(["zip_code", "bin", "state"], axis=1, inplace=True)
+    
+    return df
+
+
+def customize_us_shapefile(states : geopandas.GeoDataFrame) -> geopandas.GeoDataFrame:
+    """
+    Function that customizes us shapefile changing Alaska and Hawaii location for better visualization.
+    
+    Returns:
+        Transformed states shapefile
+    """
+    states = states.loc[states["STUSPS"].isin(df["state"].unique())]
+    states.loc[states["NAME"]=="Alaska", "geometry"] = states.loc[states["NAME"]=="Alaska", "geometry"].scale(0.3, 0.3)
+    states.loc[states["NAME"]=="Alaska", "geometry"] = states.loc[states["NAME"]=="Alaska", "geometry"].translate(-10000000, -3000000)
+    states.loc[states["NAME"]=="Hawaii", "geometry"] = states.loc[states["NAME"]=="Hawaii", "geometry"].translate(3000000, 1500000)
+
+    alaska = states.loc[states["NAME"]=="Alaska", "geometry"]
+    alaska_geom = alaska[47]
+    alaska_bool_list = []
+    for P in alaska_geom.geoms:
+        alaska_bool_list.append(P.bounds[0]< -10000000)
+    alaska = alaska.explode(index_parts=True)
+    alaska = alaska.reset_index().set_index("level_1")
+    alaska = MultiPolygon(list(alaska[alaska_bool_list].geometry))
+
+    states.loc[states["NAME"]=="Alaska", "geometry"] = pd.Series([alaska]).values
+    
+    return states
+
+
+def get_relevant_words(df: pd.DataFrame, target: pd.Series) -> list:
+    """
+    Function that filters out the words in the "loan_title" whose usage frequency differs between the accepted and rejected applications by at least 1% of total words used count. 
+    Also, to prevent multicollinearity in modelling, if words have a correlation higher than 0.7, then only the word with a higher correlation with target column is kept.
+    
+    Parameters:
+        df(pd.DataFrame): A dataframe containing "loan_title" column
+        target(pd.Series): A series containing the target data.
+
+      Returns:
+        A list containing the filtered words
+    """
+    word_df = pd.Series([y for x in df["loan_title"].dropna().values.flatten() for y in x.split()]).value_counts().to_frame("total")
+    word_df["total"] = (word_df["total"]/word_df["total"].sum()).round(3)
+    for index, value in enumerate(["rejected", "accepted"]):
+        word_df[value] = pd.Series([y for x in df.loc[target == index, "loan_title"].dropna().values.flatten() for y in x.split()]).value_counts()
+        word_df[value] = (word_df[value]/word_df[value].sum()).round(3)
+
+    difference_words = (word_df[np.abs(word_df["rejected"]-word_df["accepted"]) > 0.01]).index.to_list()
+
+    word_df = pd.DataFrame(index=df.index)
+    for word in difference_words:
+        word_df.loc[df["loan_title"].str.contains(fr"(?:^|\W){word}(?:$|\W)").fillna(False), word] = 1
+        word_df.loc[:, word] = word_df.loc[:, word].fillna(0).astype(int)
+
+        word_corr = word_df.corrwith(word_df[word])
+        multicoll_list = word_corr[(word_corr > 0.7) & (word_corr.index != word)].index.tolist()
+        if multicoll_list:
+            for multicoll_name in multicoll_list:
+                if np.abs(word_df[multicoll_name].corr(target)) < np.abs(word_df[word].corr(target)):
+                    word_df = word_df.drop(multicoll_name, axis=1)
+                else:
+                    word_df = word_df.drop(word, axis=1)
+                    break
+    return word_df.columns.to_list()
+
+
+def clean_data_2_1(df):
+    """
+    Function 1 of 2 for cleaning data for second task - transforming data into correct format, dropping columns with too little variability, etc.
+    """
+    df = df.drop(df[df.isna().all(axis=1)].index, axis=0)
+    
+    df["risk_score"] = (df["fico_range_high"] + df["fico_range_low"])/2
+    df = df.drop(["fico_range_high", "fico_range_low", "sec_app_fico_range_high", "sec_app_fico_range_low", "title", "url", "funded_amnt"], axis=1)
+
+    df.loc[:, ["earliest_cr_line", "issue_d"]] = df.loc[:, ["earliest_cr_line", "issue_d"]].astype("datetime64[D]")
+
+    df = df.drop(df.columns[df.columns.str.contains("joint") | df.columns.str.contains("sec_")], axis=1)
+        
+    top_value_percentage = (df.loc[:, df.columns[~(df.dtypes == "string")]].apply(lambda x: x.value_counts().max(), axis=0)*100/df.shape[0])
+    df = df.drop(top_value_percentage[top_value_percentage>98].index, axis=1)
+    
+    
+    
+    df["emp_length"] = df["emp_length"].replace({"10+ years":"15", "< 1 year":"0"})
+    df["emp_length"] = df["emp_length"].str.extract(r"([0-9]+)").astype("float")
+    df = df.rename(columns={"emp_length" : "emp_length_years"})
+    
+    df["home_ownership"] = df["home_ownership"].str.lower()
+    df = df.rename(columns={"addr_state":"state"})
+    
+    df["mths_since_earliest_cr_line"] = ((df["issue_d"] - df["earliest_cr_line"])/np.timedelta64(1, 'M')).round()
+    df = df.drop("earliest_cr_line", axis=1)
+    
+    sub_grade = pd.Series(df["sub_grade"].dropna().unique()).sort_values(ascending=False).tolist()
+    sub_grade_dict = {}
+    grade_dict = {}
+    num = 0
+    grade_num = 7
+    for grade in sub_grade:
+        sub_grade_dict[grade] = num
+        if ((num == 5) | (num%5 == 0)):
+            grade_dict[grade[0]] = grade_num
+            grade_num -= 1
+        num += 1
+    
+    df["sub_grade"] = df["sub_grade"].replace(sub_grade_dict)
+    df["grade"] = df["grade"].replace(grade_dict)
+    
+    numeric_cols = df.columns[((df.dtypes == "float") | (df.dtypes == "int")) & (~df.columns.isin(["sub_grade", "int_rate", "grade"]))]
+    for column in numeric_cols:
+        if column in df.columns:
+            col_corr = df.corrwith(df[column])
+            multicoll_list = col_corr[(col_corr > 0.7) & (col_corr.index != column)].index.tolist()
+            if multicoll_list:
+                for corr in multicoll_list:
+                    if np.abs(df[corr].corr(df["sub_grade"])) < np.abs(df[column].corr(df["sub_grade"])):
+                        df = df.drop(corr, axis=1)
+                    else:
+                        df = df.drop(column, axis=1)
+                        break
+    
+    df = df.convert_dtypes()
+    
+    fcols = df.select_dtypes('float').columns
+    icols = df.select_dtypes('integer').columns
+    df[fcols] = df[fcols].apply(pd.to_numeric, downcast='float')
+    df[icols] = df[icols].apply(pd.to_numeric, downcast='integer')
+    
+    return df
+
+
+def clean_data_2_2(df):
+    """
+    Function 2 of 2 for cleaning data for second task - transforming data into correct format, dropping columns with too little variability, etc.
+    """
+    df = df.drop(df[df.isna().all(axis=1)].index, axis=0)
+    
+    df["risk_score"] = (df["fico_range_high"] + df["fico_range_low"])/2
+    df["sec_risk_score"] = (df["sec_app_fico_range_high"] + df["sec_app_fico_range_low"])/2
+    df = df.drop(["fico_range_high", "fico_range_low", "sec_app_fico_range_high", "sec_app_fico_range_low", "title", "url", "funded_amnt"], axis=1)
+    
+    df["emp_length"] = df["emp_length"].replace({"10+ years":"15", "< 1 year":"0"})
+    df["emp_length"] = df["emp_length"].str.extract(r"([0-9]+)").astype("float")
+    df = df.rename(columns={"emp_length" : "emp_length_years"})
+    
+    df["home_ownership"] = df["home_ownership"].str.lower()
+    df = df.rename(columns={"addr_state":"state"})
+    
+    sub_grade = pd.Series(df["sub_grade"].dropna().unique()).sort_values(ascending=False).tolist()
+    sub_grade_dict = {}
+    grade_dict = {}
+    num = 0
+    grade_num = 7
+    for grade in sub_grade:
+        sub_grade_dict[grade] = num
+        if ((num == 5) | (num%5 == 0)):
+            grade_dict[grade[0]] = grade_num
+            grade_num -= 1
+        num += 1
+    
+    df["sub_grade"] = df["sub_grade"].replace(sub_grade_dict)
+    df["grade"] = df["grade"].replace(grade_dict)
+    
+    df.loc[:, ["earliest_cr_line", "issue_d", "sec_app_earliest_cr_line"]] = df.loc[:, ["earliest_cr_line", "issue_d", "sec_app_earliest_cr_line"]].astype("datetime64[D]")
+    df["mths_since_earliest_cr_line"] = ((df["issue_d"] - df["earliest_cr_line"])/np.timedelta64(1, 'M')).round()
+    df = df.drop("earliest_cr_line", axis=1)
+    
+    df = df.drop(df.columns[df.columns.str.contains("joint") | df.columns.str.contains("sec_")], axis=1)
+    
+    top_value_percentage = (df.loc[:, df.columns[~(df.dtypes == "string")]].apply(lambda x: x.value_counts().max(), axis=0)*100/df.shape[0]).fillna(100)
+    df = df.drop(top_value_percentage[top_value_percentage>98].index, axis=1)
+    
+    return df
+
+
+def columns_to_drop_due_multicoll(df):
+    """
+    Function that calculates which between two features with correlation value over 0.7 is higher correlated with the target column. Returns a list with all the columns that should be dropped to avoid multicollinearity.
+    """
+    columns_to_drop = []
+    corr_df = pd.DataFrame(columns = ["col1", "col2", "corr"])
+    numeric_cols = df.columns[((df.dtypes == "float") | (df.dtypes == "int")) & (~df.columns.isin(["sub_grade", "int_rate", "grade"]))]
+    for column in numeric_cols:
+        if column in df.columns:
+            col_corr = df.corrwith(df[column])
+            multicoll_list = col_corr[(col_corr > 0.7) & (col_corr.index != column)].index.tolist()
+            if multicoll_list:
+                for corr in multicoll_list:
+                    if np.abs(df[corr].corr(df["sub_grade"])) < np.abs(df[column].corr(df["sub_grade"])):
+                        columns_to_drop.append(corr)
+                    else:
+                        columns_to_drop.append(column)
+                        break
+    return columns_to_drop
+
+
+def get_best_corrs_missing_cols(df_input, months_columns, columns_to_drop):
+    """
+    A function that calculates the most correlated features for columns with missing data. Also calculates mean missing column values for each binned correlated column interval for imputation.
+    
+    Parameters:
+        df_input(pd.DataFrame): All data
+        months_columns(list): A list containing features that contain "number_of_months_since_X" data
+        columns_to_drop(list): A list containing features to drop to avoid multicollinearity
+        
+    Returns:
+        best_corrs_means_dict({str:pd.Series}): A dictionary containing series with missing_col mean values for each corr_col interval for each feature pair in max_corr_pairs.
+        max_corr_pairs(pd.Series): A series containing missing_col and corr_col pairs.
+    """
+    df = df_input.copy()
+    missing_values = df.columns[((df.isna().sum()*100/df.shape[0])>1) & (~df.columns.isin(columns_to_drop)) & (df.dtypes == "float") & (~df.columns.isin(months_columns))]
+    
+    corr_df = pd.DataFrame()
+    for column in missing_values:
+        corr_df[column] = df.loc[:, df.columns[df.dtypes == "float"]].corrwith(df[column].astype("float"))
+    corr_df[corr_df> 0.99] = np.nan
+    corr_df[np.abs(corr_df)<0.1] = np.nan
+    
+    max_corr_pairs = np.abs(corr_df).idxmax()
+    max_corr_pairs = max_corr_pairs.dropna(axis=0)
+    best_corrs_means_dict = {}
+    
+    for column in max_corr_pairs.index:
+        df.loc[:, "temp_column"] = pd.cut(df[max_corr_pairs[column]], 10)
+        best_corrs_means_dict[column] = df.groupby("temp_column")[column].median().to_frame().reset_index().rename(columns={"temp_column":"bin_column", column:"medians"})
+    return best_corrs_means_dict, max_corr_pairs
+
+
+def get_positive_negative_careers(df_input):
+    """
+    A function that calculates which carrer names in the "emp_title" column correlate positively and which negatively with target column.
+    
+    Returns:
+        negative_corr_careers(list): List containing 20 careers that negatively correlate with target column
+        positive_corr_careers(list): List containing 20 careers that positively correlate with target column
+    """
+    df = df_input.copy()
+    df["emp_title"] = df["emp_title"].str.lower().str.replace('[^a-zA-Z0-9 ]', '')
+    prof_df = pd.Series([y for x in df["emp_title"].str.lower().str.replace(r'[^a-zA-Z0-9 ]', '').dropna() for y in x.split()]).value_counts().to_frame("total")
+
+    corr_words = pd.Series(name = "correlation")
+    for word in prof_df.head(400).index.tolist():
+        words_one_hot = df.loc[:, ["emp_title", "sub_grade"]]
+
+        words_one_hot.loc[words_one_hot["emp_title"].str.contains(fr"(?:^|\W){word}(?:$|\W)").fillna(False), "word"] = 1
+        words_one_hot.loc[:, "word"] = words_one_hot.loc[:, "word"].fillna(0).astype(int)
+        corr_words[word] = words_one_hot["word"].corr(words_one_hot["sub_grade"].astype("float"))
+
+    negative_corr_careers = corr_words.sort_values().head(20).index.tolist()
+    positive_corr_careers = corr_words.sort_values(ascending=False).head(20).index.tolist()
+    
+    return negative_corr_careers, positive_corr_careers
+
+
+###
+
+###
+
+
+def objective_booster_class(trial, X: pd.DataFrame, y: pd.Series):
+    
+
+    
+    scalers = trial.suggest_categorical("scaler", ["MinMax", "Standard", "Robust"])
+    if scalers == "MinMax":
+        scaler = MinMaxScaler()
+    elif scalers == "Standard":
+        scaler = StandardScaler()
+    else:
+        scaler = RobustScaler()
+        
+    state = trial.suggest_categorical("state", [True, False])
+
+    learning_rate = trial.suggest_float("learning_rate", 1e-4, 0.7)
+    n_estimators = trial.suggest_int("n_estimators", 10, 300)
+    max_depth = trial.suggest_int("max_depth", 2, 6, log=True)
+    min_impurity_decrease = trial.suggest_float(
+        "min_impurity_decrease", 1e-10, 0.1
     )
-    grid_df = (
-        grid_df.reset_index()
-        .loc[:, ["mean_test_score", "mean_train_score"]]
-        .join(pd.DataFrame(grid_df["params"].tolist()))
+    
+    Preprocessor = Pipeline(
+        [
+            ("extract_words", ExtractWords(relevant_words)),
+            ("zip_to_coords", ZipStateToCoordinates(state_coord_means, bin_coord_means, state=state)),
+            ("unknown_to_nan", UnknownToNan(missing_dict)),
+            ("add_missing_column", AddMissingColumn(list(missing_dict.keys()), one_column = True)),
+            ("fill_missing_data", FillMissingData()),
+            ("transform_to_log", TransformToLog(to_log_list))
+        ]
     )
-    grid_df.columns = grid_df.columns.str.replace(model_name + "__", "")
-    return grid_df
+
+    full_pipe = Pipeline(
+        [
+            ("preprocessor", Preprocessor),
+            ("scaler", scaler),
+            (
+                "model", 
+                 xg.XGBClassifier(
+                    learning_rate=learning_rate,
+                    n_estimators=n_estimators,
+                    max_depth=max_depth,
+                    min_impurity_decrease=min_impurity_decrease,
+                    tree_method='gpu_hist',
+                ),
+            ),
+        ]
+    )
+
+
+    models[trial.number] = full_pipe
+    score = cross_val_score(
+        full_pipe,
+        X,
+        y,
+        n_jobs=-1,
+        cv=5,
+        scoring="roc_auc",
+        verbose=30,
+    )
+    average_precision = score.mean()
+    return average_precision
+
+
+def objective_booster(trial, X: pd.DataFrame, y: pd.Series):
+    
+
+    
+    scalers = trial.suggest_categorical("scaler", ["MinMax", "Standard", "Robust"])
+    if scalers == "MinMax":
+        scaler = MinMaxScaler()
+    elif scalers == "Standard":
+        scaler = StandardScaler()
+    else:
+        scaler = RobustScaler()
+        
+    state = trial.suggest_categorical("state", [True, False])
+    binarize = trial.suggest_categorical("binarize", ["none", "some", "all"])
+
+    learning_rate = trial.suggest_float("learning_rate", 1e-4, 0.7)
+    n_estimators = trial.suggest_int("n_estimators", 10, 300)
+    max_depth = trial.suggest_int("max_depth", 2, 6, log=True)
+    min_impurity_decrease = trial.suggest_float(
+        "min_impurity_decrease", 1e-10, 0.1
+    )
+    
+    one_hot_columns = ["term", "verification_status", "initial_list_status", "disbursement_method", "purpose", "home_ownership", "application_type"]
+    
+    
+    OneHotPipeline = ColumnTransformer(
+        [
+            ("one_hot_columns",OneHotEncoder(drop="first", handle_unknown="ignore"), one_hot_columns)
+        ], remainder="passthrough"
+    )
+
+    Preprocessor = Pipeline(
+        [
+            ("zip_to_coords", ZipStateToCoordinates(state_coord_means, bin_coord_means, state=state)),
+            ("careers",FilterCareers(negative_corr_careers, positive_corr_careers, "emp_title")),
+            ("filter_values_columns",SmallValuesToOther(["purpose", "home_ownership"])),
+            ("fill_missing_data", FillMissingDataAccepted(best_corrs_means_dict, max_corr_pairs, months_columns, columns_to_drop, binarize=binarize)),
+            ("log_transform", TransformToLog(skewed_columns)),
+            ("one_hot_encode", OneHotPipeline)
+        ]
+    )
+    
+    full_pipe = Pipeline(
+        [
+            ("preprocessor", Preprocessor),
+            ("scaler", scaler),
+            (
+                "model", 
+                 xg.XGBRegressor(
+                    learning_rate=learning_rate,
+                    n_estimators=n_estimators,
+                    max_depth=max_depth,
+                    min_impurity_decrease=min_impurity_decrease,
+                    tree_method='gpu_hist',
+                ),
+            ),
+        ]
+    )
+
+    models[trial.number] = full_pipe
+    score = cross_val_score(
+        full_pipe,
+        X,
+        y,
+        n_jobs=-1,
+        cv=5,
+        scoring="r2",
+        verbose=30,
+    )
+    print(score)
+    r2 = score.mean()
+    return r2
 
 
 ###
