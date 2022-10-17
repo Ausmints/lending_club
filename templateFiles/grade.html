@@ -1,0 +1,86 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href='/staticFiles/main.css' />
+
+
+
+
+  </head>
+  <body  id="hideAll" class="hideAll">
+    <header>
+      <div class="central-div">
+        <div class="logo"/>
+      </div>
+    </header>
+    <div class="central-div">
+      <h1 class="first-header">LendingClub Diagnostic tool</h1>
+      <p class = "main-text" onclick="writeText()" >Check your chances to get a loan by using this amazing tool. No need to go through tedious processess or nail biting interviews. Just enter your data*, click submit and get your results immediately!</p>
+      <p class = "sneaky-small-text">*Your data may or may not be sold to third parties</p>
+    </div>
+    <div class="hero">
+      <div class="layer">
+        <div class="hero-content">
+          <span>Get a loan today</span>
+        </div>
+      </div>
+    </div>
+    <div  class = "form-outer">
+      <div class="central-div">
+        <div id="anchor" class="form-inner">
+          <div id="stroke_form" class="form">
+            <h2>Your grade will be <span id="grade_answer"></span></h2>
+            <p>Your sub grade will be <span id="sub_grade_answer"></span> and the interest rate <span id="int_rate_answer"></span></p>
+            <div class="columns-container">
+              <div class="column">
+                <div>
+                  <button><a class="button_link" href="{{url_for("home")}}">Back to home page</a></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <div class="central-div">
+        <span>LendingClub</span>
+        <hr></hr>
+        <p>© 2022 LendingClub Bank. All rights reserved. <br/>
+          Btw, this is not an actual LendingClub page, just a student project</p>
+      </div>
+    </footer>
+    <script>
+
+    function showAnswer() {
+      document.getElementById("grade_answer").textContent += prediction_grade
+      document.getElementById("sub_grade_answer").innerHTML = prediction_sub_grade
+      document.getElementById("int_rate_answer").innerHTML = prediction_int_rate
+    }
+
+
+      let queryString = window.location.search;
+      let prediction_grade = "None";
+      let prediction_sub_grade = "None";
+      let prediction_int_rate = "None";
+      if (queryString) {
+        let urlParams = new URLSearchParams(queryString);
+        prediction_grade = urlParams.get('prediction_grade');
+        prediction_sub_grade = urlParams.get('prediction_sub_grade');
+        prediction_int_rate = urlParams.get('prediction_int_rate');
+      }
+
+      function onloadFunc() {
+        showAnswer()
+
+      }
+
+      window.onload=function() {
+          document.getElementById('hideAll').style.visibility = "visible";
+          onloadFunc()
+      }
+
+    </script>
+  </body>
+</html>

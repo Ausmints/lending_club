@@ -1,0 +1,296 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href='/staticFiles/main.css' />
+
+
+
+
+  </head>
+  <body  id="hideAll" class="hideAll">
+    <header>
+      <div class="central-div">
+        <div class="logo"/>
+      </div>
+    </header>
+    <div class="central-div">
+      <h1 class="first-header">LendingClub Diagnostic tool</h1>
+      <p class = "main-text" onclick="writeText()" >Check your chances to get a loan by using this amazing tool. No need to go through tedious processess or nail biting interviews. Just enter your data*, click submit and get your results immediately!</p>
+      <p class = "sneaky-small-text">*Your data may or may not be sold to third parties</p>
+    </div>
+    <div class="hero">
+      <div class="layer">
+        <div class="hero-content">
+          <span>Get a loan today</span>
+        </div>
+      </div>
+    </div>
+    <div  class = "form-outer">
+      <div class="central-div">
+        <div id="anchor" class="form-inner">
+
+          <div id="stroke_form" class="form">
+            <h2>Step 2: What grade and interest rate will I get?</h2>
+            <p>Fill in all the data about your loan and yourself, then click the button below</p>
+            <form action="\predict_step_2" class="columns-container" method="post">
+              <div class="column">
+                <div>
+                  <label for="term">What term length do you want for your loan?r</label>
+                  <select id="term" name="term">
+                    <option value="36 months">36 months</option>
+                    <option value="60 months">60 months</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="emp_title">What is your job title?</label>
+                  <input type="text" id="emp_title" name="emp_title">
+                </div>
+                <div>
+                  <label for="home_ownership">What is your home ownership status?</label>
+                  <select id="home_ownership" name="home_ownership">
+                    <option value="Mortgage">Mortgage</option>
+                    <option value="Rent">Rent</option>
+                    <option value="Own">Own</option>
+                    <option value="None">None</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="annual_inc">What is your annual income?</label>
+                  <input type="number" id="annual_inc" name="annual_inc" value="20000" min="0">
+                </div>
+                <div>
+                  <label for="purpose">What is the purpose of your loan?</label>
+                  <select id="purpose" name="purpose">
+                    <option value="debt_consolidation">Debt consolidation</option>
+                    <option value="credit_card">Credit card</option>
+                    <option value="home_improvement">Home improvement</option>
+                    <option value="major_purchase">Major purchase</option>
+                    <option value="medical">Medical</option>
+
+                    <option value="small_business">Small business</option>
+                    <option value="car">Car</option>
+                    <option value="vacation">Vacation</option>
+                    <option value="moving">Moving</option>
+                    <option value="house">House</option>
+
+                    <option value="wedding">Wedding</option>
+                    <option value="renewable_energy">Renewable energy</option>
+                    <option value="educational">Educational</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="delinq_2yrs">How many 30+ days past-due incidences of delinquency in your credit file there have been in the past two years?</label>
+                  <input type="number" id="delinq_2yrs" name="delinq_2yrs" value="0" min="0">
+                </div>
+                <div>
+                  <label for="inq_last_6mths">How many inquiries thera have been on you in the last 6 months?</label>
+                  <input type="number" id="inq_last_6mths" name="inq_last_6mths" value="1" min="0">
+                </div>
+                <div>
+                  <label for="mths_since_last_delinq">How many months ago did you have your last incidence of delinquency? (Put -1 if you've never been delinquent)</label>
+                  <input type="number" id="mths_since_last_delinq" name="mths_since_last_delinq" value="-1" min="-1">
+                </div>
+                <div>
+                  <label for="mths_since_last_record">How many months ago did you have your last public record? (Put -1 if you don't have a public record)</label>
+                  <input type="number" id="mths_since_last_record" name="mths_since_last_record" value="-1" min="-1">
+                </div>
+                <div>
+                  <label for="mths_since_last_record">How many months ago did you have your last public record? (Put -1 if you don't have a public record)</label>
+                  <input type="number" id="mths_since_last_record" name="mths_since_last_record" value="-1" min="-1">
+                </div>
+                <div>
+                  <label for="pub_rec">How many public records have you had in total?</label>
+                  <input type="number" id="pub_rec" name="pub_rec" value="0" min="0">
+                </div>
+                <div>
+                  <label for="application_type">Are you applying to the loan individually, or is it a joint venture?</label>
+                  <select id="application_type" name="application_type">
+                    <option value="Individual">Individual</option>
+                    <option value="Joint App">Joint App</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="tot_coll_amt">How many collection amounts have you ever owned?</label>
+                  <input type="number" id="tot_coll_amt" name="tot_coll_amt" value="0" min="0">
+                </div>
+                <div>
+                  <label for="open_act_il">How many currently active installment trades do you have?</label>
+                  <input type="number" id="open_act_il" name="open_act_il" value="2" min="0">
+                </div>
+                <div>
+                  <label for="open_il_12m">How many installment accounts have you opened in the past 12 months?</label>
+                  <input type="number" id="open_il_12m" name="open_il_12m" value="0" min="0">
+                </div>
+                <div>
+                  <label for="mths_since_rcnt_il">How many months ago did you have your most recent installment account? (Put -1 if you've never done it)</label>
+                  <input type="number" id="mths_since_rcnt_il" name="mths_since_rcnt_il" value="0" min="-1">
+                </div>
+                <div>
+                  <label for="total_bal_il">What is the total current balance of all your installment accounts?</label>
+                  <input type="number" id="total_bal_il" name="total_bal_il" value="0" min="0">
+                </div>
+                <div>
+                  <label for="il_util">What is the ratio of total current balance to high credit limit on all your installed accounts?</label>
+                  <input type="number" id="il_util" name="il_util" value="70">
+                </div>
+                <div>
+                  <label for="max_bal_bc">What is the maximum current balance owed on all your revolving accounts?</label>
+                  <input type="number" id="max_bal_bc" name="max_bal_bc" value="4000">
+                </div>
+                <div>
+                  <label for="all_util">What is the balance to credit limit on all your trades?</label>
+                  <input type="number" id="all_util" name="all_util" value="70">
+                </div>
+                <div>
+                  <label for="inq_fi">How many personal finance inquiries have you had?</label>
+                  <input type="number" id="inq_fi" name="inq_fi" value="0" min="0">
+                </div>
+                <div>
+                  <label for="total_cu_tl">How many finance trades do you have?</label>
+                  <input type="number" id="total_cu_tl" name="total_cu_tl" value="0" min="0">
+                </div>
+                <div>
+                  <label for="inq_last_12m">How many credit inquiries in past 12 months have you had?</label>
+                  <input type="number" id="inq_last_12m" name="inq_last_12m" value="2" min="0">
+                </div>
+                <div>
+                  <label for="acc_open_past_24mths">How many trades have you opened in past 24 months?</label>
+                  <input type="number" id="acc_open_past_24mths" name="acc_open_past_24mths" value="2" min="0">
+                </div>
+                <div>
+                  <label for="bc_open_to_buy">What is your total open to buy on revolving bankcards?</label>
+                  <input type="number" id="bc_open_to_buy" name="bc_open_to_buy" value="4000" min="0">
+                </div>
+                <div>
+                  <label for="bc_util">What is your ratio of total current balance to high credit limit for all bankcard accounts?</label>
+                  <input type="number" id="bc_util" name="bc_util" value="70">
+                </div>
+                <div>
+                  <label for="revol_util">What is the amount of credit you are using relative to all available revolving credit?</label>
+                  <input type="number" id="revol_util" name="revol_util" value="70">
+                </div>
+                <div>
+                  <label for="mo_sin_old_il_acct">How many months ago did your oldest bank installment account opened? (Put -1 if you've don't have one)</label>
+                  <input type="number" id="mo_sin_old_il_acct" name="mo_sin_old_il_acct" value="100" min="-1">
+                </div>
+                <div>
+                  <label for="mo_sin_old_rev_tl_op">How many months ago did your oldest revolving account opened? (Put -1 if you've don't have one)</label>
+                  <input type="number" id="mo_sin_old_rev_tl_op" name="mo_sin_old_rev_tl_op" value="100" min="-1">
+                </div>
+                <div>
+                  <label for="mo_sin_rcnt_rev_tl_op">How many months ago did your most recent revolving account opened? (Put -1 if you've don't have one)</label>
+                  <input type="number" id="mo_sin_rcnt_rev_tl_op" name="mo_sin_rcnt_rev_tl_op" value="10" min="-1">
+                </div>
+                <div>
+                  <label for="mths_since_earliest_cr_line">How many months ago did your oldest credit line was opened? (Put -1 if you've don't have one)</label>
+                  <input type="number" id="mths_since_earliest_cr_line" name="mths_since_earliest_cr_line" value="100" min="-1">
+                </div>
+                <div>
+                  <label for="mo_sin_rcnt_tl">How many months ago did your most recent account opened? (Put -1 if you've don't have one)</label>
+                  <input type="number" id="mo_sin_rcnt_tl" name="mo_sin_rcnt_tl" value="10" min="-1">
+                </div>
+                <div>
+                  <label for="mort_acc">How many mortgage accounts do you have?</label>
+                  <input type="number" id="mort_acc" name="mort_acc" value="0" min="0">
+                </div>
+                <div>
+                  <label for="mths_since_recent_bc">How many months ago did your most recent bankcard account opened? (Put -1 if you've don't have one)</label>
+                  <input type="number" id="mths_since_recent_bc" name="mths_since_recent_bc" value="50" min="-1">
+                </div>
+                <div>
+                  <label for="mths_since_recent_inq">How many months ago did your receive your most recent inquiry? (Put -1 if you've never received one)</label>
+                  <input type="number" id="mths_since_recent_inq" name="mths_since_recent_inq" value="7" min="-1">
+                </div>
+                <div>
+                  <label for="num_accts_ever_120_pd">How many accounts have you ever had be 120 or more days past due?</label>
+                  <input type="number" id="num_accts_ever_120_pd" name="num_accts_ever_120_pd" value="0" min="0">
+                </div>
+                <div>
+                  <label for="num_actv_rev_tl">How many currently active revolving trades do you have?</label>
+                  <input type="number" id="num_actv_rev_tl" name="num_actv_rev_tl" value="2" min="0">
+                </div>
+                <div>
+                  <label for="num_bc_tl">How many bankcard accounts do you have?</label>
+                  <input type="number" id="num_bc_tl" name="num_bc_tl" value="3" min="0">
+                </div>
+                <div>
+                  <label for="num_tl_120dpd_2m">How many accounts do you have currently have 120 days past due?</label>
+                  <input type="number" id="num_tl_120dpd_2m" name="num_tl_120dpd_2m" value="0" min="0">
+                </div>
+                <div>
+                  <label for="num_tl_30dpd">How many accounts do you have currently have 30 days past due?</label>
+                  <input type="number" id="num_tl_30dpd" name="num_tl_30dpd" value="0" min="0">
+                </div>
+                <div>
+                  <label for="num_tl_90g_dpd_24m">How many accounts have you had be 90 or more days past due in the last 2 years?</label>
+                  <input type="number" id="num_tl_90g_dpd_24m" name="num_tl_90g_dpd_24m" value="0" min="0">
+                </div>
+                <div>
+                  <label for="pct_tl_nvr_dlq">What percent of the trades you had never went delinquent?</label>
+                  <input type="number" id="pct_tl_nvr_dlq" name="pct_tl_nvr_dlq" value="100" min="0">
+                </div>
+                <div>
+                  <label for="pub_rec_bankruptcies">How many public record bankrupcies do you have?</label>
+                  <input type="number" id="pub_rec_bankruptcies" name="pub_rec_bankruptcies" value="0" min="0">
+                </div>
+                <div>
+                  <label for="tax_liens">How many tax liens do you have?</label>
+                  <input type="number" id="tax_liens" name="tax_liens" value="0" min="0">
+                </div>
+                <div>
+                  <label for="tot_hi_cred_lim">What is your total high credit/credit limit?</label>
+                  <input type="number" id="tot_hi_cred_lim" name="tot_hi_cred_lim" value="30000" min="0">
+                </div>
+                <div>
+                  <label for="total_bc_limit">What is your total bankcard high credit/credit limit?</label>
+                  <input type="number" id="total_bc_limit" name="total_bc_limit" value="30000" min="0">
+                </div>
+                <div>
+                  <label for="disbursement_method">By which method do you want to receive your loan?</label>
+                  <select id="disbursement_method" name="disbursement_method">
+                    <option value="Cash">Cash</option>
+                    <option value="DirectPay">DirectPay</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="verification_status">Is the income verified?</label>
+                  <select id="verification_status" name="verification_status">
+                    <option value="Own">Not Verified</option>
+                    <option value="Rent">Source Verified</option>
+                    <option value="Mortgage">Verified</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="initial_list_status">Is the loan whole or fractional?</label>
+                  <select id="initial_list_status" name="initial_list_status">
+                    <option value="w">Whole</option>
+                    <option value="f">Fractional</option>
+                  </select>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <div class="central-div">
+        <span>LendingClub</span>
+        <hr></hr>
+        <p>© 2022 LendingClub Bank. All rights reserved. <br/>
+          Btw, this is not an actual LendingClub page, just a student project</p>
+      </div>
+    </footer>
+    <script>
+
+
+      window.onload=function() {
+          document.getElementById('hideAll').style.visibility = "visible";
+      }
+
+    </script>
+  </body>
+</html>

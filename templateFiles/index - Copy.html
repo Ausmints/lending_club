@@ -1,0 +1,803 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href='/staticFiles/main.css' />
+
+
+
+
+  </head>
+  <body  id="hideAll" class="hideAll">
+    <header>
+      <div class="central-div">
+        <div class="logo"/>
+      </div>
+    </header>
+    <div class="central-div">
+      <h1 class="first-header">J. H. Hospital Diagnostic tool</h1>
+      <p class = "main-text" onclick="writeText()" >Developed by J. H. Hospital researchers, using the newest AI technologies, this diagnostic tool will predict whether you are in danger of suffering a stroke*. It is easy to use and only takes a few seconds.</p>
+      <p class = "sneaky-small-text">*This tool is for informative uses only. Does not count as actual medical advice.</p>
+    </div>
+    <div class="hero">
+      <div class="layer">
+        <div class="hero-content">
+          <span>Check your health today</span>
+        </div>
+      </div>
+    </div>
+    <div  class = "form-outer">
+      <div class="central-div">
+        <div class="form-inner">
+          <div id="anchor" class="buttons">
+            <div id="button1" onclick="changeActive(this)" class="button"><span>Stroke</span>
+            </div>
+            <div id="button2" onclick="changeActive(this)" class="button"><span>BMI</span>
+            </div>
+            <div id="button3" onclick="changeActive(this)" class="button"><span>Avg glucose</span>
+            </div>
+            <div id="button4" onclick="changeActive(this)" class="button"><span>Hypertension
+            </div>
+            <div id="button5" onclick="changeActive(this)" class="button"><span>Bmi + glucose</span>
+            </div>
+            <div id="button6" onclick="changeActive(this)" class="button"><span>Bmi + hypertension</span>
+            </div>
+            <div id="button7" onclick="changeActive(this)" class="button"><span>Glucose + hypertension</span>
+            </div>
+            <div id="button8" onclick="changeActive(this)" class="button"><span>Bmi + glucose + hypertension</span>
+            </div>
+          </div>
+
+          <div id="stroke_form" class="form">
+            <h2>Stroke</h2>
+            <p>Fill in all the data about yourself and then click the button below</p>
+            <form action="\predict" class="columns-container" method="post">
+              <div class="column">
+                <div>
+                  <label for="gender">Choose your gender:</label>
+                  <select id="gender" name="gender">
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="residence_type">Choose your residence type:</label>
+                  <select id="residence_type" name="residence_type">
+                    <option value="Urban">Urban</option>
+                    <option value="Rural">Rural</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="heart_disease">Do you or have you ever had a heart disease?</label>
+                  <select id="heart_disease" name="heart_disease">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="hypertension">Do you or have you ever had a hypertension (high blood pressure)?</label>
+                  <select id="hypertension" name="hypertension">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="ever_married">Are you or have you ever been married?</label>
+                  <select id="ever_married" name="ever_married">
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="work_type">What type of work are you doing?</label>
+                  <select id="work_type" name="work_type">
+                    <option value="Govt_job">Government job</option>
+                    <option value="Never_worked">I've never had a job</option>
+                    <option value="Private">Private business</option>
+                    <option value="Self-employed">I'm self employed</option>
+                    <option value="children">I'm still a child</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="smoking_status">Do you currently or have you ever smoked?</label>
+                  <select id="smoking_status" name="smoking_status">
+                    <option value="smokes">I'm a smoker currently</option>
+                    <option value="formerly smoked">I've smoked in the past</option>
+                    <option value="never smoked">I've never smoked</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="age">What is your age?</label>
+                  <input type="number" id="age" name="age" value="45" min="0", max="120">
+                </div>
+                <div>
+                  <label for="bmi">What is your bmi?</label>
+                  <input type="number" id="bmi" name="bmi" value="30" min="0", max="100">
+                </div>
+                <div>
+                  <label for="avg_glucose_level">What is your average glucose level?</label>
+                  <input type="number" id="avg_glucose_level" name="avg_glucose_level" value="105" min="40", max="340">
+                </div>
+                <input id="form_type" name="form_type" type="hidden" value="stroke_form">
+                <div>
+                  <input id="submit_button" type="submit" value="Check whether I'm in danger">
+                </div>
+                <div id="answer_stroke_form" class="answer answer-hidden">
+                  <p id="answer_1_stroke_form"></p>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div id="bmi_form" class="form form-hidden">
+            <h2>BMI</h2>
+            <p>Fill in all the data about yourself and then click the button below to check your BMI level</p>
+            <form action="\predict" class="columns-container" method="post">
+              <div class="column">
+                <div>
+                  <label for="gender">Choose your gender:</label>
+                  <select id="gender" name="gender">
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="residence_type">Choose your residence type:</label>
+                  <select id="residence_type" name="residence_type">
+                    <option value="Urban">Urban</option>
+                    <option value="Rural">Rural</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="heart_disease">Do you or have you ever had a heart disease?</label>
+                  <select id="heart_disease" name="heart_disease">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="hypertension">Do you or have you ever had a hypertension (high blood pressure)?</label>
+                  <select id="hypertension" name="hypertension">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="ever_married">Are you or have you ever been married?</label>
+                  <select id="ever_married" name="ever_married">
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="work_type">What type of work are you doing?</label>
+                  <select id="work_type" name="work_type">
+                    <option value="Govt_job">Government job</option>
+                    <option value="Never_worked">I've never had a job</option>
+                    <option value="Private">Private business</option>
+                    <option value="Self-employed">I'm self employed</option>
+                    <option value="children">I'm still a child</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="smoking_status">Do you currently or have you ever smoked?</label>
+                  <select id="smoking_status" name="smoking_status">
+                    <option value="smokes">I'm a smoker currently</option>
+                    <option value="formerly smoked">I've smoked in the past</option>
+                    <option value="never smoked">I've never smoked</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="age">What is your age?</label>
+                  <input type="number" id="age" name="age" value="45" min="0", max="120">
+                </div>
+                <div>
+                  <label for="avg_glucose_level">What is your average glucose level?</label>
+                  <input type="number" id="avg_glucose_level" name="avg_glucose_level" value="105" min="40", max="340">
+                </div>
+                <input id="form_type" name="form_type" type="hidden" value="bmi_form">
+                <div>
+                  <input id="submit_button" type="submit" value="Check my levels">
+                </div>
+                <div id="answer_bmi_form" class="answer answer-hidden">
+                  <p id="answer_1_bmi_form">Your bmi is </p>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div id="glucose_form" class="form form-hidden">
+            <h2>Average glucose level</h2>
+            <p>Fill in all the data about yourself and then click the button below to check your average glucose level</p>
+            <form action="\predict" class="columns-container" method="post">
+              <div class="column">
+                <div>
+                  <label for="gender">Choose your gender:</label>
+                  <select id="gender" name="gender">
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="residence_type">Choose your residence type:</label>
+                  <select id="residence_type" name="residence_type">
+                    <option value="Urban">Urban</option>
+                    <option value="Rural">Rural</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="heart_disease">Do you or have you ever had a heart disease?</label>
+                  <select id="heart_disease" name="heart_disease">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="hypertension">Do you or have you ever had a hypertension (high blood pressure)?</label>
+                  <select id="hypertension" name="hypertension">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="ever_married">Are you or have you ever been married?</label>
+                  <select id="ever_married" name="ever_married">
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="work_type">What type of work are you doing?</label>
+                  <select id="work_type" name="work_type">
+                    <option value="Govt_job">Government job</option>
+                    <option value="Never_worked">I've never had a job</option>
+                    <option value="Private">Private business</option>
+                    <option value="Self-employed">I'm self employed</option>
+                    <option value="children">I'm still a child</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="smoking_status">Do you currently or have you ever smoked?</label>
+                  <select id="smoking_status" name="smoking_status">
+                    <option value="smokes">I'm a smoker currently</option>
+                    <option value="formerly smoked">I've smoked in the past</option>
+                    <option value="never smoked">I've never smoked</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="age">What is your age?</label>
+                  <input type="number" id="age" name="age" value="45" min="0", max="120">
+                </div>
+                <div>
+                  <label for="bmi">What is your bmi?</label>
+                  <input type="number" id="bmi" name="bmi" value="30" min="0", max="100">
+                </div>
+                <input id="form_type" name="form_type" type="hidden" value="glucose_form">
+                <div>
+                  <input id="submit_button" type="submit" value="Check my levels">
+                </div>
+                <div id="answer_glucose_form" class="answer answer-hidden">
+                  <p id="answer_1_glucose_form">Your average glucose level is </p>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div id="hypertension_form" class="form form-hidden">
+            <h2>Hypertension</h2>
+            <p>Fill in all the data about yourself and then click the button below to check whether you are in danger of encountering hypertension</p>
+            <form action="\predict" class="columns-container" method="post">
+              <div class="column">
+                <div>
+                  <label for="gender">Choose your gender:</label>
+                  <select id="gender" name="gender">
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="residence_type">Choose your residence type:</label>
+                  <select id="residence_type" name="residence_type">
+                    <option value="Urban">Urban</option>
+                    <option value="Rural">Rural</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="heart_disease">Do you or have you ever had a heart disease?</label>
+                  <select id="heart_disease" name="heart_disease">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="ever_married">Are you or have you ever been married?</label>
+                  <select id="ever_married" name="ever_married">
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="work_type">What type of work are you doing?</label>
+                  <select id="work_type" name="work_type">
+                    <option value="Govt_job">Government job</option>
+                    <option value="Never_worked">I've never had a job</option>
+                    <option value="Private">Private business</option>
+                    <option value="Self-employed">I'm self employed</option>
+                    <option value="children">I'm still a child</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="smoking_status">Do you currently or have you ever smoked?</label>
+                  <select id="smoking_status" name="smoking_status">
+                    <option value="smokes">I'm a smoker currently</option>
+                    <option value="formerly smoked">I've smoked in the past</option>
+                    <option value="never smoked">I've never smoked</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="age">What is your age?</label>
+                  <input type="number" id="age" name="age" value="45" min="0", max="120">
+                </div>
+                <div>
+                  <label for="bmi">What is your bmi?</label>
+                  <input type="number" id="bmi" name="bmi" value="30" min="0", max="100">
+                </div>
+                <div>
+                  <label for="avg_glucose_level">What is your average glucose level?</label>
+                  <input type="number" id="avg_glucose_level" name="avg_glucose_level" value="105" min="40", max="340">
+                </div>
+                <input id="form_type" name="form_type" type="hidden" value="hypertension_form">
+                <div>
+                  <input id="submit_button" type="submit" value="Check whether I'm in danger">
+                </div>
+                <div id="answer_hypertension_form" class="answer answer-hidden">
+                  <p id="answer_1_hypertension_form"></p>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div id="bg_form" class="form form-hidden">
+            <h2>BMI and Average glucose level</h2>
+            <p>Fill in all the data about yourself and then click the button below to check your bmi and average glucose level</p>
+            <form action="\predict" class="columns-container" method="post">
+              <div class="column">
+                <div>
+                  <label for="gender">Choose your gender:</label>
+                  <select id="gender" name="gender">
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="residence_type">Choose your residence type:</label>
+                  <select id="residence_type" name="residence_type">
+                    <option value="Urban">Urban</option>
+                    <option value="Rural">Rural</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="heart_disease">Do you or have you ever had a heart disease?</label>
+                  <select id="heart_disease" name="heart_disease">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="hypertension">Do you or have you ever had a hypertension (high blood pressure)?</label>
+                  <select id="hypertension" name="hypertension">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="ever_married">Are you or have you ever been married?</label>
+                  <select id="ever_married" name="ever_married">
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="work_type">What type of work are you doing?</label>
+                  <select id="work_type" name="work_type">
+                    <option value="Govt_job">Government job</option>
+                    <option value="Never_worked">I've never had a job</option>
+                    <option value="Private">Private business</option>
+                    <option value="Self-employed">I'm self employed</option>
+                    <option value="children">I'm still a child</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="smoking_status">Do you currently or have you ever smoked?</label>
+                  <select id="smoking_status" name="smoking_status">
+                    <option value="smokes">I'm a smoker currently</option>
+                    <option value="formerly smoked">I've smoked in the past</option>
+                    <option value="never smoked">I've never smoked</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="age">What is your age?</label>
+                  <input type="number" id="age" name="age" value="45" min="0", max="120">
+                </div>
+                <input id="form_type" name="form_type" type="hidden" value="bg_form">
+                <div>
+                  <input id="submit_button" type="submit" value="Check my levels">
+                </div>
+                <div id="answer_bg_form" class="answer answer-hidden">
+                  <p id="answer_1_bg_form">Your bmi is </p>
+                  <p id="answer_2_bg_form">Your average glucose level is </p>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div id="bh_form" class="form form-hidden">
+            <h2>BMI and Hypertension</h2>
+            <p>Fill in all the data about yourself and then click the button below to check your BMI level and whether you are in danger of hypertension.</p>
+            <form action="\predict" class="columns-container" method="post">
+              <div class="column">
+                <div>
+                  <label for="gender">Choose your gender:</label>
+                  <select id="gender" name="gender">
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="residence_type">Choose your residence type:</label>
+                  <select id="residence_type" name="residence_type">
+                    <option value="Urban">Urban</option>
+                    <option value="Rural">Rural</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="heart_disease">Do you or have you ever had a heart disease?</label>
+                  <select id="heart_disease" name="heart_disease">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="ever_married">Are you or have you ever been married?</label>
+                  <select id="ever_married" name="ever_married">
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="work_type">What type of work are you doing?</label>
+                  <select id="work_type" name="work_type">
+                    <option value="Govt_job">Government job</option>
+                    <option value="Never_worked">I've never had a job</option>
+                    <option value="Private">Private business</option>
+                    <option value="Self-employed">I'm self employed</option>
+                    <option value="children">I'm still a child</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="smoking_status">Do you currently or have you ever smoked?</label>
+                  <select id="smoking_status" name="smoking_status">
+                    <option value="smokes">I'm a smoker currently</option>
+                    <option value="formerly smoked">I've smoked in the past</option>
+                    <option value="never smoked">I've never smoked</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="age">What is your age?</label>
+                  <input type="number" id="age" name="age" value="45" min="0", max="120">
+                </div>
+                <div>
+                  <label for="avg_glucose_level">What is your average glucose level?</label>
+                  <input type="number" id="avg_glucose_level" name="avg_glucose_level" value="105" min="40", max="340">
+                </div>
+                <input id="form_type" name="form_type" type="hidden" value="bh_form">
+                <div>
+                  <input id="submit_button" type="submit" value="Predict">
+                </div>
+                <div id="answer_bh_form" class="answer answer-hidden">
+                  <p id="answer_1_bh_form">Your bmi is </p>
+                  <p id="answer_2_bh_form"></p>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div id="gh_form" class="form form-hidden">
+            <h2>Average glucose level and Hypertension</h2>
+            <p>Fill in all the data about yourself and then click the button below to check your average glucose level and whether you are in danger of hypertension.</p>
+            <form action="\predict" class="columns-container" method="post">
+              <div class="column">
+                <div>
+                  <label for="gender">Choose your gender:</label>
+                  <select id="gender" name="gender">
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="residence_type">Choose your residence type:</label>
+                  <select id="residence_type" name="residence_type">
+                    <option value="Urban">Urban</option>
+                    <option value="Rural">Rural</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="heart_disease">Do you or have you ever had a heart disease?</label>
+                  <select id="heart_disease" name="heart_disease">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="ever_married">Are you or have you ever been married?</label>
+                  <select id="ever_married" name="ever_married">
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="work_type">What type of work are you doing?</label>
+                  <select id="work_type" name="work_type">
+                    <option value="Govt_job">Government job</option>
+                    <option value="Never_worked">I've never had a job</option>
+                    <option value="Private">Private business</option>
+                    <option value="Self-employed">I'm self employed</option>
+                    <option value="children">I'm still a child</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="smoking_status">Do you currently or have you ever smoked?</label>
+                  <select id="smoking_status" name="smoking_status">
+                    <option value="smokes">I'm a smoker currently</option>
+                    <option value="formerly smoked">I've smoked in the past</option>
+                    <option value="never smoked">I've never smoked</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="age">What is your age?</label>
+                  <input type="number" id="age" name="age" value="45" min="0", max="120">
+                </div>
+                <div>
+                  <label for="bmi">What is your bmi?</label>
+                  <input type="number" id="bmi" name="bmi" value="30" min="0", max="100">
+                </div>
+                <input id="form_type" name="form_type" type="hidden" value="gh_form">
+                <div>
+                  <input id="submit_button" type="submit" value="Predict">
+                </div>
+                <div id="answer_gh_form" class="answer answer-hidden">
+                  <p id="answer_1_gh_form">Your average glucose level is </p>
+                  <p id="answer_2_gh_form"></p>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div id="bgh_form" class="form form-hidden">
+            <h2>BMI, Average glucose level, Hypertension</h2>
+            <p>Fill in all the data about yourself and then click the button below to predict the values for all three features.</p>
+            <form action="\predict" class="columns-container" method="post">
+              <div class="column">
+                <div>
+                  <label for="gender">Choose your gender:</label>
+                  <select id="gender" name="gender">
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="residence_type">Choose your residence type:</label>
+                  <select id="residence_type" name="residence_type">
+                    <option value="Urban">Urban</option>
+                    <option value="Rural">Rural</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="heart_disease">Do you or have you ever had a heart disease?</label>
+                  <select id="heart_disease" name="heart_disease">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="ever_married">Are you or have you ever been married?</label>
+                  <select id="ever_married" name="ever_married">
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="work_type">What type of work are you doing?</label>
+                  <select id="work_type" name="work_type">
+                    <option value="Govt_job">Government job</option>
+                    <option value="Never_worked">I've never had a job</option>
+                    <option value="Private">Private business</option>
+                    <option value="Self-employed">I'm self employed</option>
+                    <option value="children">I'm still a child</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="smoking_status">Do you currently or have you ever smoked?</label>
+                  <select id="smoking_status" name="smoking_status">
+                    <option value="smokes">I'm a smoker currently</option>
+                    <option value="formerly smoked">I've smoked in the past</option>
+                    <option value="never smoked">I've never smoked</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="age">What is your age?</label>
+                  <input type="number" id="age" name="age" value="45" min="0", max="120">
+                </div>
+                <input id="form_type" type="hidden" name="form_type" value="bgh_form">
+                <div>
+                  <input id="submit_button" type="submit" value="Predict">
+                </div>
+                <div id="answer_bgh_form" class="answer answer-hidden">
+                  <p id="answer_1_bgh_form">Your bmi is </p>
+                  <p id="answer_2_bgh_form">Your average glucose level is </p>
+                  <p id="answer_3_bgh_form"></p>
+                </div>
+              </div>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <footer>
+      <div class="central-div">
+        <span>The Johns Hopkins Hospital</span>
+        <hr></hr>
+        <p>Copyright © 2022 The Johns Hopkins University, The Johns Hopkins Hospital, and The Johns Hopkins Health System Corporation. All rights reserved.</p>
+      </div>
+    </footer>
+    <script>
+
+      function hasClass(ele, cls) {
+        return ele.className.match(new RegExp('(\\s|^)' + cls + '(\\s|$)'));
+      }
+
+      function addClass(ele, cls) {
+        if (!hasClass(ele, cls))
+            ele.className += " " + cls;
+      }
+
+      function removeClass(ele, cls) {
+        if (hasClass(ele, cls)) {
+            var reg = new RegExp('(\\s|^)' + cls + '(\\s|$)');
+            ele.className = ele.className.replace(reg, ' ');
+        }
+      }
+
+      const BUTTONS = ["button1", "button2", "button3", "button4",
+    "button5", "button6", "button7", "button8"]
+
+      const FORMS = ["stroke_form", "bmi_form", "glucose_form",
+      "hypertension_form", "bg_form", "bh_form", "gh_form", "bgh_form"]
+
+      function changeActive(btn) {
+        for (let i = 0; i < BUTTONS.length; i++) {
+          let elem = document.getElementById(BUTTONS[i])
+          if(hasClass(elem, "active-button")) {
+            removeClass(elem, "active-button");
+          }
+        }
+        if(!hasClass(btn, "active-button")) {
+            addClass(btn, "active-button");
+        }
+
+        let new_form = document.getElementById(FORMS[BUTTONS.indexOf(btn.id)])
+
+        for (let i = 0; i < FORMS.length; i++) {
+          let form = document.getElementById(FORMS[i])
+          if(!hasClass(form, "form-hidden")) {
+            addClass(form, "form-hidden");
+          }
+        }
+
+        if(hasClass(new_form, "form-hidden")) {
+            removeClass(new_form, "form-hidden");
+        }
+      }
+
+      function showAnswer(form) {
+        let answer_box = document.getElementById("answer_"+form)
+        if(hasClass(answer_box, "answer-hidden")) {
+            removeClass(answer_box, "answer-hidden");
+        }
+
+        let hypertension_text = "You are in danger of hypertension. Please check in with your doctor."
+        let hypertension_text_negative = "You are not in danger of hypertension."
+        let paragraph = document.getElementById("answer_1_"+form)
+        let paragraph_2 = ""
+        let paragraph_3 = ""
+        if (!(prediction_2 == "None")) {
+          paragraph_2 = document.getElementById("answer_2_"+form)
+        }
+        if (!(prediction_3 == "None")) {
+          paragraph_3 = document.getElementById("answer_3_"+form)
+        }
+        switch (form) {
+          case "stroke_form":
+            if (prediction_1 == 0) {
+              paragraph.innerHTML = "You are not in danger of having a stroke.";
+            } else {
+              paragraph.innerHTML = "You are in danger of having a stroke. Please check with your doctor immediately.";
+            }
+            break;
+          case "bmi_form":
+            paragraph.textContent += prediction_1;
+            break;
+          case "glucose_form":
+            paragraph.textContent += prediction_1;
+            break;
+          case "hypertension_form":
+            if (prediction_1 == 0) {
+              paragraph.innerHTML = hypertension_text_negative;
+            } else {
+              paragraph.innerHTML = hypertension_text;
+            }
+            break;
+          case "bg_form":
+            paragraph.textContent += prediction_1;
+            paragraph_2.textContent += prediction_2;
+            break;
+          case "bh_form":
+            paragraph.textContent += prediction_1;
+            if (prediction_2 == 0) {
+              paragraph_2.innerHTML = hypertension_text_negative;
+            } else {
+              paragraph_2.innerHTML = hypertension_text;
+            }
+            break;
+          case "gh_form":
+            paragraph.textContent += prediction_1;
+            if (prediction_2 == 0) {
+              paragraph_2.innerHTML = hypertension_text_negative;
+            } else {
+              paragraph_2.innerHTML = hypertension_text;
+            }
+            break;
+          case "bgh_form":
+            paragraph.textContent += prediction_1;
+            paragraph_2.textContent += prediction_2;
+            if (prediction_3 == 0) {
+              paragraph_3.innerHTML = hypertension_text_negative;
+            } else {
+              paragraph_3.innerHTML = hypertension_text;
+            }
+            break;
+
+        }
+
+      }
+
+      let queryString = window.location.search;
+      let last_form = "stroke_form";
+      let prediction_1 = "None";
+      let prediction_2 = "None";
+      let prediction_3 = "None";
+      if (queryString) {
+        let urlParams = new URLSearchParams(queryString);
+        last_form = urlParams.get('last_form');
+        prediction_1 = urlParams.get('prediction_1');
+        prediction_2 = urlParams.get('prediction_2');
+        prediction_3 = urlParams.get('prediction_3');
+      }
+
+      function onloadFunc() {
+        changeActive(document.getElementById(BUTTONS[FORMS.indexOf(last_form)]))
+        if (!(prediction_1 == "None")) {
+          showAnswer(last_form)
+
+        }
+      }
+
+      window.onload=function() {
+          document.getElementById('hideAll').style.visibility = "visible";
+          onloadFunc()
+      }
+
+    </script>
+  </body>
+</html>
