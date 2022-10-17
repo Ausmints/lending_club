@@ -2,33 +2,33 @@
 
 ## Table of contents 
 
-#### Setting up the libraries
+* <b>Setting up the libraries</b>
 
-### First task
+* <b>First task</b>
 
-#### Setting up the data
+* * Setting up the data
 
-#### EDA
+* * EDA
 
-#### Missing data and data engineering
+* * Missing data and data engineering
 
-#### Model training
+* * Model training
 
-#### Edit from the future
+* * Edit from the future
 
-### Second task
+* <b>Second task</b>
 
-#### Setting up the data
+* * Setting up the data
 
-#### EDA
+* * EDA
 
-#### Data cleaning and enineering
+* * Data cleaning and enineering
 
-#### Model training
+* * Model training
 
-#### Third task
+* * Third task
 
-#### Testing
+* * Testing
 
 Predicting whether a person should be given a loan, if yes, predicting risk level and interest rate.
 
