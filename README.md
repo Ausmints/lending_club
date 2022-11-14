@@ -1,5 +1,7 @@
 # Predicting loan status, grade and interest rate using Lending club data
 
+Predicting whether a person should be given a loan, if yes, predicting risk level and interest rate.
+
 ## Table of contents 
 
 * <b>Setting up the libraries</b>
@@ -30,5 +32,6 @@
 
 * * Testing
 
-Predicting whether a person should be given a loan, if yes, predicting risk level and interest rate.
+## Libraries used
 
+scikit-learn, sklego, xgboost
