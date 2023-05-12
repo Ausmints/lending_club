@@ -3,6 +3,7 @@ import numpy as np
 from AUS_Functions_transformers_only import *
 from flask import Flask, request, render_template, redirect, url_for
 import pandas as pd
+import json
 
 app = Flask(__name__, template_folder="templateFiles", static_folder="staticFiles")
 
@@ -112,8 +113,7 @@ attributes_accepted_df = pd.DataFrame()
 def load_model():
     global models_dict
     for model in models_list:
-        models_dict[model] = joblib.load(f"models\\{model}.pkl")
-    models_dict["None"] = "None"
+        models_dict[model] = joblib.load(f"{model}.pkl")
 
 
 def string_to_numeral(df: pd.DataFrame, numerical_features: list):
@@ -142,6 +142,8 @@ def accepted():
 @app.route("/grade")
 def grade():
     return render_template("grade.html")
+
+
 
 
 @app.route("/predict_step_2", methods=["GET", "POST"])
@@ -212,7 +214,55 @@ def get_prediction():
     return render_template("index.html")
 
 
+@app.route("/predict_step_2_api", methods=["GET", "POST"])
+def get_prediction_2_api():
+    if request.method == "POST":
+        attributes_json = request.get_json()
+        print(attributes_json)
+        df = pd.DataFrame.from_dict(request.get_json(), orient="index").T
+        df["zip_code"] = df["zip_code"]+"xx"
+        df = string_to_numeral(df, numerical_features_grade)
+
+        df_accepted = df.loc[:, attributes_accepted]
+        prediction = models_dict["trained_model_accepted"].predict(df)
+        if (prediction[0] == 0):
+            return {"accepted":str(prediction[0])}
+        else:
+            for elem in grade_unnecesarry_columns:
+                df.loc[1, elem] = 1
+
+            prediction_grade = models_dict["trained_model_grade"].predict(df)
+            prediction_grade_rounded = np.round(prediction_grade).astype(int)
+            prediction_grade_rounded[prediction_grade_rounded < 1] = 1
+            prediction_grade_rounded[prediction_grade_rounded > 7] = 7
+
+            prediction_sub_grade = models_dict[f"trained_model_{prediction_grade_rounded[0]}_sub_grades"].predict(df)
+            prediction_sub_grade_rounded = np.round(prediction_sub_grade).astype(int)
+            prediction_sub_grade_rounded[prediction_sub_grade_rounded < 1] = 1
+            prediction_sub_grade_rounded[prediction_sub_grade_rounded > 5] = 5
+
+            df.loc[:,"grade"] = prediction_grade
+            prediction_int_rate = models_dict["trained_model_int_rate"].predict(df)[0]
+
+            prediction_grade = pd.Series(prediction_grade_rounded).replace(grade_dict)[0]
+            prediction_sub_grade = prediction_grade + str(prediction_sub_grade_rounded[0])[0]
+            return {"accepted":str(prediction[0]),
+                    "grade":str(prediction_grade),
+                    "sub_grade":str(prediction_sub_grade),
+                    "int_rate":str(prediction_int_rate)}
+
+
+@app.route("/predict_api", methods=["GET", "POST"])
+def get_prediction_api():
+    if request.method == "POST":
+        attributes_json = request.get_json()
+        print(attributes_json)
+        df = pd.DataFrame.from_dict(request.get_json(), orient="index").T
+        df["zip_code"] = df["zip_code"]+"xx"
+        df = string_to_numeral(df, numerical_features_accepted)
+        prediction = models_dict["trained_model_accepted"].predict(df)
+        return {"prediction":str(prediction[0])}
+
 if __name__ == "__main__":
     load_model()
-    app.debug = True
-    app.run(host="0.0.0.0", port=80)
+    app.run(host="0.0.0.0", port=5000)

@@ -5,4 +5,5 @@ RUN python3 -m pip install --upgrade pip
 RUN pip3 install -r requirements.txt
 COPY . .
 ENTRYPOINT [ "python" ]
-CMD ["flask_app.py" ]
+EXPOSE 5000
+CMD ["flask_app.py","--host=0.0.0.0"]
